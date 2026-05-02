@@ -127,6 +127,29 @@ function generateTags(title: string, summary: string): string[] {
   return tags;
 }
 
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry<NewsItem[]>>();
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+function setCached<T>(key: string, data: T): void {
+  cache.set(key, { data: data as NewsItem[], timestamp: Date.now() });
+}
+
 async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
   try {
     const controller = new AbortController();
@@ -191,6 +214,9 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
 }
 
 export async function fetchAllNews(): Promise<NewsItem[]> {
+  const cached = getCached<NewsItem[]>("all-news");
+  if (cached) return cached;
+
   const results = await Promise.all(sources.map((s) => fetchRssSource(s)));
   const all = results.flat();
 
@@ -198,10 +224,17 @@ export async function fetchAllNews(): Promise<NewsItem[]> {
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
 
-  return all.slice(0, 24);
+  const sliced = all.slice(0, 24);
+  setCached("all-news", sliced);
+  return sliced;
 }
 
 export async function fetchNewsByCategoryFromRss(category: NewsCategory): Promise<NewsItem[]> {
+  const cached = getCached<NewsItem[]>(`category-${category}`);
+  if (cached) return cached;
+
   const all = await fetchAllNews();
-  return all.filter((item) => item.category === category);
+  const filtered = all.filter((item) => item.category === category);
+  setCached(`category-${category}`, filtered);
+  return filtered;
 }
