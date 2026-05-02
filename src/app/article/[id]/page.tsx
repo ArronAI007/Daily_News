@@ -8,6 +8,15 @@ interface ArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
+export async function generateStaticParams() {
+  try {
+    const digest = await fetchNews();
+    return digest.items.map((item) => ({ id: item.id }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { id } = await params;
   const digest = await fetchNews();

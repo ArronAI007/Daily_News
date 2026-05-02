@@ -9,6 +9,10 @@ interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
+export function generateStaticParams() {
+  return validCategories.map((category) => ({ category }));
+}
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
 

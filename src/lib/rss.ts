@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { load } from "cheerio";
 import { NewsItem, NewsCategory } from "@/types/news";
 
@@ -91,6 +92,10 @@ function classifyCategory(title: string, source: string): NewsCategory {
   return bestCategory;
 }
 
+function generateId(link: string): string {
+  return createHash("sha256").update(link).digest("hex").slice(0, 12);
+}
+
 function extractSummary(description: string): string {
   const $ = load(description, null, false);
   let text = $.text().trim();
@@ -173,7 +178,7 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
     const items: NewsItem[] = [];
 
     $("item").each((_, el) => {
-      const title = $(el).find("title").text().trim();
+      let title = $(el).find("title").text().trim();
       let link = $(el).find("link").text().trim();
       const pubDate = $(el).find("pubDate").text().trim();
       const description = $(el).find("description").text().trim();
@@ -185,7 +190,7 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
       }
 
       if (title.includes("<![CDATA[")) {
-        title.replace(/<!\[CDATA\[(.*?)\]\]>/, "$1").trim();
+        title = title.replace(/<!\[CDATA\[(.*?)\]\]>/, "$1").trim();
       }
 
       const summary = extractSummary(description);
@@ -193,7 +198,7 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
       const tags = generateTags(title, summary);
 
       items.push({
-        id: `${source.name}::${link}`,
+        id: generateId(link),
         title,
         summary,
         source: source.name,

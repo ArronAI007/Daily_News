@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { fetchNews } from "@/lib/news";
 
+export const dynamic = "force-static";
+
 export async function GET() {
   try {
     const digest = await fetchNews();
