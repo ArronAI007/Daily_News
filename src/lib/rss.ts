@@ -141,18 +141,18 @@ interface CacheEntry<T> {
 
 const cache = new Map<string, CacheEntry<NewsItem[]>>();
 
-function getCached<T>(key: string): T | null {
+function getCached(key: string): NewsItem[] | null {
   const entry = cache.get(key);
   if (!entry) return null;
   if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
     cache.delete(key);
     return null;
   }
-  return entry.data as T;
+  return entry.data;
 }
 
-function setCached<T>(key: string, data: T): void {
-  cache.set(key, { data: data as NewsItem[], timestamp: Date.now() });
+function setCached(key: string, data: NewsItem[]): void {
+  cache.set(key, { data, timestamp: Date.now() });
 }
 
 async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
@@ -211,15 +211,13 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
     });
 
     return items.slice(0, 8);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error(`RSS fetch failed for ${source.name}: ${message}`);
+  } catch {
     return [];
   }
 }
 
 export async function fetchAllNews(): Promise<NewsItem[]> {
-  const cached = getCached<NewsItem[]>("all-news");
+  const cached = getCached("all-news");
   if (cached) return cached;
 
   const results = await Promise.all(sources.map((s) => fetchRssSource(s)));
@@ -235,7 +233,7 @@ export async function fetchAllNews(): Promise<NewsItem[]> {
 }
 
 export async function fetchNewsByCategoryFromRss(category: NewsCategory): Promise<NewsItem[]> {
-  const cached = getCached<NewsItem[]>(`category-${category}`);
+  const cached = getCached(`category-${category}`);
   if (cached) return cached;
 
   const all = await fetchAllNews();

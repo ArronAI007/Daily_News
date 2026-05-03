@@ -7,6 +7,17 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Daily Brief — AI & Investment News",
   description: "Curated daily news for AI practitioners and investors",
+  openGraph: {
+    title: "Daily Brief — AI & Investment News",
+    description: "Curated daily news for AI practitioners and investors",
+    type: "website",
+    locale: "zh_CN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Daily Brief — AI & Investment News",
+    description: "Curated daily news for AI practitioners and investors",
+  },
 };
 
 export default function RootLayout({
