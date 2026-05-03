@@ -5,12 +5,16 @@ import { HeroSection } from "@/components/hero/HeroSection";
 import { MarketTicker } from "@/components/hero/MarketTicker";
 import { CategoryGrid } from "@/components/news-card/CategoryGrid";
 import { LoadingFallback } from "@/components/loading/LoadingFallback";
+import { NewsRefreshBar } from "@/components/news-refresh/NewsRefreshBar";
 
-async function NewsContent() {
+export const revalidate = 0;
+
+async function NewsContent({ buildTime }: { buildTime: string }) {
   const digest = await fetchNews();
 
   return (
     <>
+      <NewsRefreshBar buildTime={buildTime} />
       <HeroSection topStories={digest.topStories} />
       {digest.marketSnapshot && <MarketTicker snapshot={digest.marketSnapshot} />}
       <CategoryGrid news={digest.items} />
@@ -19,10 +23,12 @@ async function NewsContent() {
 }
 
 export default function HomePage() {
+  const buildTime = new Date().toISOString();
+
   return (
     <main className="flex-1">
       <Suspense fallback={<LoadingFallback />}>
-        <NewsContent />
+        <NewsContent buildTime={buildTime} />
       </Suspense>
 
       {/* Daily Digest CTA */}

@@ -10,6 +10,8 @@ interface CategoryPageProps {
   params: Promise<{ category: string }>;
 }
 
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return validCategories.map((category) => ({ category }));
 }

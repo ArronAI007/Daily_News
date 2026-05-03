@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://daily.news.com"),
   title: "Daily Brief — AI & Investment News",
   description: "Curated daily news for AI practitioners and investors",
   openGraph: {
@@ -12,11 +13,15 @@ export const metadata: Metadata = {
     description: "Curated daily news for AI practitioners and investors",
     type: "website",
     locale: "zh_CN",
+    url: "https://daily.news.com",
   },
   twitter: {
     card: "summary_large_image",
     title: "Daily Brief — AI & Investment News",
     description: "Curated daily news for AI practitioners and investors",
+  },
+  alternates: {
+    canonical: "https://daily.news.com",
   },
 };
 

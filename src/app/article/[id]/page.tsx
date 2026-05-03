@@ -9,15 +9,7 @@ interface ArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateStaticParams() {
-  try {
-    const digest = await fetchNews();
-    return digest.items.map((item) => ({ id: item.id }));
-  } catch (error) {
-    console.error("[Article] Failed to generate static params:", error);
-    return [];
-  }
-}
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { id } = await params;

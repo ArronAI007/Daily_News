@@ -138,7 +138,9 @@ const MAX_TOTAL_ITEMS = 24;
 const SUMMARY_MAX_LENGTH = 200;
 const SUMMARY_READ_RATE = 200;
 const MAX_TAGS = 3;
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = process.env.RSS_CACHE_TTL_MS
+  ? parseInt(process.env.RSS_CACHE_TTL_MS, 10)
+  : 60 * 1000;
 
 interface CacheEntry<T> {
   data: T;
