@@ -18,6 +18,7 @@ export interface NewsDigest {
   items: NewsItem[];
   topStories: NewsItem[];
   marketSnapshot?: MarketSnapshot;
+  fetchedAt: string;
 }
 
 export interface MarketSnapshot {

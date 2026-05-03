@@ -4,10 +4,10 @@ import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 
 interface NewsRefreshBarProps {
-  buildTime: string;
+  fetchedAt: string;
 }
 
-export function NewsRefreshBar({ buildTime }: NewsRefreshBarProps) {
+export function NewsRefreshBar({ fetchedAt }: NewsRefreshBarProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = () => {
@@ -22,13 +22,14 @@ export function NewsRefreshBar({ buildTime }: NewsRefreshBarProps) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
     });
   };
 
   return (
     <div className="sticky top-[var(--nav-height,4rem)] z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2.5 bg-[var(--color-surface)]/80 backdrop-blur-md border-b border-[var(--color-border)] text-sm">
       <span className="text-[var(--color-text-muted)]">
-        更新时间：{formatTime(buildTime)}
+        数据获取时间：{formatTime(fetchedAt)}
       </span>
       <button
         onClick={handleRefresh}

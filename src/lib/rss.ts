@@ -134,13 +134,13 @@ function generateTags(title: string, summary: string): string[] {
 
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_ITEMS_PER_SOURCE = 8;
-const MAX_TOTAL_ITEMS = 24;
+const MAX_TOTAL_ITEMS = 50;
 const SUMMARY_MAX_LENGTH = 200;
 const SUMMARY_READ_RATE = 200;
 const MAX_TAGS = 3;
 const CACHE_TTL_MS = process.env.RSS_CACHE_TTL_MS
   ? parseInt(process.env.RSS_CACHE_TTL_MS, 10)
-  : 60 * 1000;
+  : 5 * 60 * 1000; // 5 minutes default
 
 interface CacheEntry<T> {
   data: T;
@@ -152,7 +152,8 @@ const cache = new Map<string, CacheEntry<NewsItem[]>>();
 function getCached(key: string): NewsItem[] | null {
   const entry = cache.get(key);
   if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+  // Use >= so that TTL=0 in development always expires immediately
+  if (Date.now() - entry.timestamp >= CACHE_TTL_MS) {
     cache.delete(key);
     return null;
   }
@@ -169,11 +170,13 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     const response = await fetch(source.url, {
+      cache: "no-store",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       signal: controller.signal,
+      next: { revalidate: 0 },
     });
     clearTimeout(timeout);
 

@@ -24,6 +24,7 @@ export async function fetchNews(): Promise<NewsDigest> {
     items,
     topStories: items.slice(0, 3),
     marketSnapshot,
+    fetchedAt: new Date().toISOString(),
   };
 }
 
