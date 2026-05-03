@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchNewsByCategory } from "@/lib/news";
 import { NewsCategory, categoryLabels, categoryColors } from "@/types/news";
@@ -11,6 +12,15 @@ interface CategoryPageProps {
 
 export function generateStaticParams() {
   return validCategories.map((category) => ({ category }));
+}
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { category } = await params;
+  const cat = category as NewsCategory;
+  return {
+    title: `${categoryLabels[cat]} — Daily Brief`,
+    description: `浏览 Daily Brief 的${categoryLabels[cat]}分类新闻`,
+  };
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

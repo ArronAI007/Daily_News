@@ -49,6 +49,7 @@ export function CategoryGrid({ news }: CategoryGridProps) {
         <div className="flex items-center gap-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg p-1">
           <button
             onClick={() => setActiveCategory("all")}
+            aria-pressed={activeCategory === "all"}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
               activeCategory === "all"
                 ? "bg-[var(--color-text)] text-[var(--color-surface)]"
@@ -61,6 +62,7 @@ export function CategoryGrid({ news }: CategoryGridProps) {
             <button
               key={cat.key}
               onClick={() => setActiveCategory(cat.key)}
+              aria-pressed={activeCategory === cat.key}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
                 activeCategory === cat.key
                   ? "text-white"

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Clock, Tag, Share2 } from "lucide-react";
@@ -12,9 +13,23 @@ export async function generateStaticParams() {
   try {
     const digest = await fetchNews();
     return digest.items.map((item) => ({ id: item.id }));
-  } catch {
+  } catch (error) {
+    console.error("[Article] Failed to generate static params:", error);
     return [];
   }
+}
+
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const digest = await fetchNews();
+  const article = digest.items.find((item) => item.id === id);
+  if (!article) {
+    return { title: "文章未找到 — Daily Brief" };
+  }
+  return {
+    title: `${article.title} — Daily Brief`,
+    description: article.summary,
+  };
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
@@ -72,8 +87,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </header>
 
         {/* Content */}
-        <div className="prose prose-lg max-w-none text-[var(--color-text-secondary)] leading-relaxed mb-10"
-        >
+        <div className="prose prose-lg max-w-none text-[var(--color-text-secondary)] leading-relaxed mb-10">
           <p className="text-xl text-[var(--color-text)] font-medium mb-6">
             {article.summary}
           </p>
@@ -109,8 +123,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <ExternalLink className="w-4 h-4" />
             阅读原文
           </a>
-          <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)] transition-colors"
-          >
+          <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[var(--color-border)] text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:border-[var(--color-text-muted)] transition-colors">
             <Share2 className="w-4 h-4" />
             分享
           </button>
@@ -118,10 +131,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Related */}
         {related.length > 0 && (
-          <section className="border-t border-[var(--color-border)] pt-8"
-          >
-            <h2 className="font-serif text-xl font-semibold text-[var(--color-text)] mb-4"
-            >
+          <section className="border-t border-[var(--color-border)] pt-8">
+            <h2 className="font-serif text-xl font-semibold text-[var(--color-text)] mb-4">
               相关阅读
             </h2>
             <div className="space-y-3">
@@ -131,19 +142,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                   href={`/article/${item.id}`}
                   className="block p-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] hover:border-[var(--color-text-muted)] transition-colors"
                 >
-                  <div className="flex items-center gap-2 mb-1.5"
-                  >
+                  <div className="flex items-center gap-2 mb-1.5">
                     <span
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: categoryColors[item.category] }}
                     />
-                    <span className="text-xs text-[var(--color-text-muted)]"
-                    >
+                    <span className="text-xs text-[var(--color-text-muted)]">
                       {item.source}
                     </span>
                   </div>
-                  <h3 className="font-medium text-[var(--color-text)] text-sm leading-snug"
-                  >
+                  <h3 className="font-medium text-[var(--color-text)] text-sm leading-snug">
                     {item.title}
                   </h3>
                 </Link>

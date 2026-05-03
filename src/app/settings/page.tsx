@@ -37,7 +37,8 @@ export default function SettingsPage() {
         setStatus("error");
         setMessage(data.error || "推送失败");
       }
-    } catch {
+    } catch (error) {
+      console.error("[Settings] Test push failed:", error);
       setStatus("error");
       setMessage("网络请求失败");
     }
@@ -88,6 +89,8 @@ export default function SettingsPage() {
                       setStatus("idle");
                     }}
                     placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/xxxxx"
+                    aria-invalid={status === "error"}
+                    aria-describedby={status !== "idle" && status !== "loading" ? "push-status" : undefined}
                     className="w-full px-4 py-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] text-sm placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] transition-colors"
                   />
                 </div>
@@ -123,9 +126,11 @@ export default function SettingsPage() {
 
                 {status === "success" && (
                   <motion.div
+                    id="push-status"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center gap-2 text-sm text-emerald-500"
+                    role="status"
                   >
                     <CheckCircle className="w-4 h-4" />
                     {message}
@@ -134,9 +139,11 @@ export default function SettingsPage() {
 
                 {status === "error" && (
                   <motion.div
+                    id="push-status"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center gap-2 text-sm text-red-500"
+                    role="alert"
                   >
                     <AlertCircle className="w-4 h-4" />
                     {message}

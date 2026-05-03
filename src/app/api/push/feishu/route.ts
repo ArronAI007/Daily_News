@@ -71,9 +71,26 @@ export async function POST(request: Request) {
   try {
     const { webhookUrl } = await request.json();
 
-    if (!webhookUrl) {
+    if (!webhookUrl || typeof webhookUrl !== "string") {
       return NextResponse.json(
         { success: false, error: "缺少 webhook URL" },
+        { status: 400 }
+      );
+    }
+
+    const allowedHosts = ["open.feishu.cn"];
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(webhookUrl);
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "无效的 webhook URL" },
+        { status: 400 }
+      );
+    }
+    if (!allowedHosts.includes(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { success: false, error: "不支持的 webhook 域名" },
         { status: 400 }
       );
     }

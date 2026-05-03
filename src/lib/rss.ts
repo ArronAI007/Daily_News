@@ -100,8 +100,8 @@ function extractSummary(description: string): string {
   const $ = load(description, null, false);
   let text = $.text().trim();
   text = text.replace(/\s+/g, " ").replace(/\n+/g, " ");
-  if (text.length > 200) {
-    text = text.slice(0, 200) + "...";
+  if (text.length > SUMMARY_MAX_LENGTH) {
+    text = text.slice(0, SUMMARY_MAX_LENGTH) + "...";
   }
   return text || "暂无摘要";
 }
@@ -125,13 +125,19 @@ function generateTags(title: string, summary: string): string[] {
   for (const [tag, keywords] of Object.entries(tagMap)) {
     if (keywords.some((k) => text.includes(k))) {
       tags.push(tag);
-      if (tags.length >= 3) break;
+      if (tags.length >= MAX_TAGS) break;
     }
   }
 
   return tags;
 }
 
+const FETCH_TIMEOUT_MS = 8000;
+const MAX_ITEMS_PER_SOURCE = 8;
+const MAX_TOTAL_ITEMS = 24;
+const SUMMARY_MAX_LENGTH = 200;
+const SUMMARY_READ_RATE = 200;
+const MAX_TAGS = 3;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CacheEntry<T> {
@@ -158,7 +164,7 @@ function setCached(key: string, data: NewsItem[]): void {
 async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
     const response = await fetch(source.url, {
       headers: {
@@ -206,12 +212,13 @@ async function fetchRssSource(source: RssSource): Promise<NewsItem[]> {
         category,
         publishedAt: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
         tags,
-        readTime: Math.max(3, Math.ceil(summary.length / 200)),
+        readTime: Math.max(3, Math.ceil(summary.length / SUMMARY_READ_RATE)),
       });
     });
 
-    return items.slice(0, 8);
-  } catch {
+    return items.slice(0, MAX_ITEMS_PER_SOURCE);
+  } catch (error) {
+    console.error(`[RSS] Failed to fetch ${source.name}:`, error);
     return [];
   }
 }
@@ -227,7 +234,7 @@ export async function fetchAllNews(): Promise<NewsItem[]> {
     return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
 
-  const sliced = all.slice(0, 24);
+  const sliced = all.slice(0, MAX_TOTAL_ITEMS);
   setCached("all-news", sliced);
   return sliced;
 }

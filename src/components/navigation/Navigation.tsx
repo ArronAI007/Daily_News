@@ -48,6 +48,7 @@ export function Navigation() {
               className="md:hidden w-9 h-9 rounded-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] flex items-center justify-center"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="菜单"
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? (
                 <X className="w-4 h-4 text-[var(--color-text-secondary)]" />
